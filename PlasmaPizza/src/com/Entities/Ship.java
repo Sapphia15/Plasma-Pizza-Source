@@ -363,6 +363,43 @@ public class Ship extends Sprite{
 			g.drawRect(47, 10, 33, 33);
 			g.drawImage(buildingImages.get(1),38,11,this);
 		}
+		
+		private class MAdaper implements MouseListener{
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if ((arg0.getX()>=279||arg0.getX()<=300)&&(arg0.getY()>=0&&arg0.getY()<=20)){
+					setVisible(false);
+				}
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		}
+		
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			repaint();
