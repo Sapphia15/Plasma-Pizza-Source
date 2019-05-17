@@ -41,15 +41,31 @@ public class Sectors {
 		loadedSectors=new ArrayList<String>();
 		clearedSectors=new ArrayList<String>();
 	}
+	
+	public Sectors(int x,int y){
+		this.x=x;
+		this.y=y;
+		fileText=new Hashtable<String,String>();
+		AlienAs=new Hashtable<String,ArrayList<AlienA>>();
+		AlienBHs=new Hashtable<String,ArrayList<AlienBH>>();
+		AlienBVs=new Hashtable<String,ArrayList<AlienBV>>();
+		Walls=new Hashtable<String,ArrayList<Wall>>();
+		scrapProcessors=new Hashtable<String,ArrayList<ScrapProcessor>>();
+		d=new Direction();
+		loadedSectors=new ArrayList<String>();
+		clearedSectors=new ArrayList<String>();
+		loadTestSector(x,y);
+	}
+	
 	//reads a sector if it is not already loaded 
 	public void loadSector(int x, int y){
 		//Read the file of the sector
 		BufferedReader reader = null;
 		try {
-			reader=new BufferedReader(new FileReader("levels/"+x+"y"+y+".txt"));
+			reader=new BufferedReader(new FileReader("src/levels/"+x+"y"+y+".txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			System.err.println("Could not find file of sector: levels/"+x+"y"+y+".txt");
+			System.err.println("Could not find file of sector: src/levels/"+x+"y"+y+".txt");
 		}
 		String text="start";
 		int line=0;
@@ -60,7 +76,8 @@ public class Sectors {
 				
 			} catch (IOException e) {
 				e.printStackTrace();
-				System.err.println("Could not read text of sector: levels/"+x+"y"+y+".txt");
+				System.err.println("Could not read text of sector: src/levels/"+x+"y"+y+".txt");
+				return;
 			}
 			line=line+1;
 		}
@@ -139,6 +156,105 @@ public class Sectors {
 		}
 		
 	}
+	
+	//reads a sector if it is not already loaded 
+		public void loadTestSector(int x, int y){
+			//Read the file of the sector
+			BufferedReader reader = null;
+			try {
+				reader=new BufferedReader(new FileReader("temp/"+x+"y"+y+".txt"));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				System.err.println("Could not find file of sector: temp/"+x+"y"+y+".txt");
+			}
+			String text="start";
+			int line=0;
+			while (text!=null) {
+				try {
+					fileText.put(x+"y"+y+"l"+line,text);
+					text=reader.readLine();
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.err.println("Could not read text of sector: temp/"+x+"y"+y+".txt");
+				}
+				line=line+1;
+			}
+			fileText.put(x+"y"+y+"l"+line, "stop");
+			line=0;
+			int addX;
+			int addY;
+			int no;
+			int i;
+			int orientation;
+			AlienAs.put(x+"y"+y, new ArrayList<AlienA>());
+			AlienBHs.put(x+"y"+y, new ArrayList<AlienBH>());
+			AlienBVs.put(x+"y"+y, new ArrayList<AlienBV>());
+			Walls.put(x+"y"+y, new ArrayList<Wall>());
+			while(text!="stop"){
+				
+				line++;
+				text=fileText.get(x+"y"+y+"l"+line);
+				if (text.equals("AlienA")){
+					
+					line++;
+					no=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+					for (i=1; i<=no;i++){
+						line++;
+						orientation=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						line++;
+						addX=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						line++;
+						addY=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						addAlienAAtSector(x,y,addX,addY,orientation);
+					}
+					
+				}
+				if (text.equals("AlienBV")){
+					line++;
+					no=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+					for (i=1; i<=no;i++){
+						line++;
+						orientation=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						line++;
+						addX=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						line++;
+						addY=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						addAlienBVAtSector(x,y,addX,addY,orientation);
+					}
+					
+				}
+				if (text.equals("AlienBH")){
+					
+					line++;
+					no=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+					for (i=1; i<=no;i++){
+						line++;
+						orientation=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						line++;
+						addX=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						line++;
+						addY=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						addAlienBHAtSector(x,y,addX,addY,orientation);
+					}
+					
+				}
+				if (text.equals("Wall")){
+					
+					line++;
+					no=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+					for (i=1; i<=no;i++){
+						line++;
+						addX=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						line++;
+						addY=Integer.parseInt(fileText.get(x+"y"+y+"l"+line));
+						addWallAtSector(x,y,addX,addY);
+					}
+					
+				}
+			}
+			
+		}
 	
 	//functions for Panel to retrieve level info
 	public ArrayList<AlienA> getAlienAs(){

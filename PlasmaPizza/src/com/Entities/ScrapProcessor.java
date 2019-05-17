@@ -3,14 +3,15 @@ package com.Entities;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
-import com.Entities.Ship;
+import com.Entities.Ship.Ship;
+
 import topDownGameAPI.Sprite;
 
 public class ScrapProcessor extends Sprite{
 	Ship ship;
 	public ScrapProcessor(int x, int y, int orientation) {
 		super(x, y, orientation);
-		image=new ImageIcon("images/ScrapProcessor.gif").getImage();
+		image=new ImageIcon("src/images/ScrapProcessor.gif").getImage();
 		ship=new Ship(0,0,-1);
 	}
 	public void interact(){

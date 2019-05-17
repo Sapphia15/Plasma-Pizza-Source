@@ -25,9 +25,9 @@ import javax.swing.Timer;
 
 import com.Entities.Scrap;
 import com.Entities.ScrapProcessor;
-import com.Entities.Ship;
 import com.Entities.NPCs.*;
 import com.Entities.Projectiles.*;
+import com.Entities.Ship.Ship;
 import com.Foreground.Wall;
 import com.Effects.*;
 import  sun.audio.*;
@@ -88,9 +88,65 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
     	setFocusable(true);
 		setDoubleBuffered(true);
 	}
+    
 	public void load() throws InterruptedException{
 		init=true;
 		repaint();
+		win=false;
+		sectorsCleared=0;
+		System.out.println("Loading Arrays...");
+		alienAs = new ArrayList<>();
+        alienBVs = new ArrayList<>();
+        alienBHs = new ArrayList<>();
+        explosions=new ArrayList<>();
+        walls=new ArrayList<>();
+        scraps=new ArrayList<>();
+        scrapProcessors=new ArrayList<>();
+        ArrayList<String> soundPaths=new ArrayList<>();
+        soundPaths.add("ExplosionA.wav");
+        soundPaths.add("LaserA.wav");
+        soundPaths.add("LaserB.wav");
+        soundPaths.add("The-Happy-New.wav");
+		//load sounds
+		System.out.println("Loading Sounds...");
+		sound=new Sounds();
+		sound.setSourcePath("src/sounds/");
+		sound.initialize(soundPaths);
+		sound.playSoundOnLoop("The-Happy-New.wav", 100);
+        System.out.println("Arrays Loaded");
+		System.out.println("Loading Images...");
+		loadedImages.put("musicIconA",new ImageIcon("src/images/musicIconA.gif").getImage());
+		loadedImages.put("musicIconB",new ImageIcon("src/images/musicIconB.gif").getImage());
+		repaint();
+        System.out.println("Images Loaded");
+        d=new Direction();
+        System.out.println("Launching Game");
+		ship=new Ship(423, 423, Direction.RIGHT);
+		addKeyListener(new TAdapter());
+		addMouseListener(new MAdapter());
+		sectors=new Sectors();
+		lvInitAliens();
+		timer = new Timer(DELAY, this);
+		loading=false;
+		ingame=false;
+		paused=false;
+		musicEnabled=true;
+		repaint();
+		ingame=true;
+		MessageBox("Galactic Coordinates: X-"+sectors.x+" Y-"+sectors.y,"SHIP NAVIGATION SYSTEM");
+        timer.start();
+	}
+	
+	/**Loads from a test sector
+	 * 
+	 * @param x
+	 * @param y
+	 * @throws InterruptedException
+	 */
+	public void load(int x,int y) throws InterruptedException{
+		init=true;
+		repaint();
+		System.out.println("Test Level ("+x+","+y+") loading...");
 		win=false;
 		sectorsCleared=0;
 		System.out.println("Loading Arrays...");
@@ -123,7 +179,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		ship=new Ship(423, 423, Direction.RIGHT);
 		addKeyListener(new TAdapter());
 		addMouseListener(new MAdapter());
-		sectors=new Sectors();
+		sectors=new Sectors(x,y);
 		lvInitAliens();
 		timer = new Timer(DELAY, this);
 		loading=false;
@@ -132,6 +188,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		musicEnabled=true;
 		repaint();
 		ingame=true;
+		MessageBox("Test Initialization Protocol Complete","SHIP ITERATION SYSTEM");
 		MessageBox("Galactic Coordinates: X-"+sectors.x+" Y-"+sectors.y,"SHIP NAVIGATION SYSTEM");
         timer.start();
 	}
