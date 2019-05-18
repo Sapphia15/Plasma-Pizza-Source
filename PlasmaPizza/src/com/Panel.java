@@ -47,7 +47,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	 */
 	private static final long serialVersionUID = 1L;
 	public Ship ship;
-	private Timer timer;
+	protected Timer timer;
 	public ArrayList<AlienA> alienAs;
 	public ArrayList<AlienBV> alienBVs;
 	public ArrayList<AlienBH> alienBHs;
@@ -229,27 +229,10 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		else if (win){
 			timer.stop();
 			drawText(g, "~YOU WIN~");
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.exit(0);
-			sound.close();
 			
 		} else{
-			sound.close();
 			timer.stop();
 			drawText(g, "--GAME OVER--");
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.exit(0);
-			sound.close();
 		}
 		Toolkit.getDefaultToolkit().sync();
 	}
@@ -710,10 +693,6 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (!Frame.f.isVisible()){
-			sound.close();
-			timer.stop();
-		}
 		if (!paused){
 			ship.move();
 			updateProjectiles();

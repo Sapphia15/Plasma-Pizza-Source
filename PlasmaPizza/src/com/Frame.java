@@ -16,7 +16,15 @@ public class Frame{
 	 */
 	public Frame(int levelX,int levelY) {
 		System.out.println("Test level initializing...");
-		f=new JFrame();
+		f=new JFrame(){
+			public void hide(){
+				super.hide();
+				board.sound.close();
+				board.timer.stop();
+				f.removeAll();
+				board=null;
+			}
+		};
 		f.setPreferredSize(new Dimension(929,929));//maximum visible value is 927 minimum visible is 0
 		f.setResizable(false);
 		f.pack();
