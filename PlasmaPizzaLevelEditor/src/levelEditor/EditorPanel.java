@@ -14,10 +14,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
+import com.Frame;
 
 import levelEditor.Sprites.Alien;
 import levelEditor.Sprites.Wall;
@@ -35,6 +40,8 @@ public class EditorPanel extends JPanel implements ActionListener{
 	String selectionType;
 	Timer timer;
 	BufferedWriter writer;
+	ScheduledExecutorService s;
+	
 	boolean mouseInComponent;
 	
 	public EditorPanel(){
@@ -49,7 +56,7 @@ public class EditorPanel extends JPanel implements ActionListener{
 		walls=new ArrayList<Wall>();
 		aliens=new ArrayList<Alien>();
 		timer.start();
-		
+		s=Executors.newScheduledThreadPool(1);
 	}
 	@Override
 	public void paintComponent(Graphics g){
@@ -85,18 +92,28 @@ public class EditorPanel extends JPanel implements ActionListener{
 	}
 	
 	public void test() {
-		save("temp");
+		save("temp/");
+		s.schedule(new Runnable(){
+			public void run(){
+				new Frame(EditorFrame.x,EditorFrame.y);
+			}
+		}, 10, TimeUnit.MILLISECONDS);
+		
 	}
 	
 	public void save(){
 		try {
+			File temp=new File("temp/");
+			for (File tempFile:temp.listFiles()){
+				tempFile.delete();
+			}
 			File f=new File("levels/"+EditorFrame.coords+".txt");
-			if (f.exists()){
+			/*if (f.exists()){
 				f.delete();
-			}
-			if (!f.exists()) {
+			}*/
+			//if (!f.exists()) {
 				f=new File("levels/"+EditorFrame.coords+".txt");
-			}
+			//}
 			writer=new BufferedWriter(new FileWriter(f));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -256,6 +273,8 @@ public class EditorPanel extends JPanel implements ActionListener{
 					}
 				} else if (option==1){
 					save();
+				} else if (option==2){
+					test();
 				}
 			}
 		}

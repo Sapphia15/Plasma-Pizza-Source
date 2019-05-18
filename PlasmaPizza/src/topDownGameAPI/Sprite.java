@@ -15,12 +15,10 @@ public class Sprite {
     protected int height;
     protected boolean vis;
     protected Image image;
-	protected Direction d;
 	public Sounds sound;
     public int orientation;
     protected Hashtable<String, Image> imgs;
     public Sprite(int x, int y, int orientation) {
-    	d=new Direction();
     	sound=new Sounds();
     	imgs=new Hashtable<String, Image>();
         this.x = x;
@@ -76,6 +74,7 @@ public class Sprite {
     public void setOrientation(int orientation){
     	this.orientation=orientation;
     }
+    
     public void interact(){
 
     }

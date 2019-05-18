@@ -31,8 +31,8 @@ class techPanel extends JPanel implements ActionListener{
 		addMouseListener(new MListener());
 		techImages=new Hashtable<Integer, Image>();
 		availableTech=new ArrayList<Integer>();
-		techImages.put(1, new ImageIcon("src/images/speedBoost.gif").getImage());
-		techImages.put(2, new ImageIcon("src/images/forceFieldIcon.gif").getImage());
+		techImages.put(1, new ImageIcon("images/speedBoost.gif").getImage());
+		techImages.put(2, new ImageIcon("images/forceFieldIcon.gif").getImage());
 		timer.start();
 		availableTech.add(1);
 		availableTech.add(2);

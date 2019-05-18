@@ -18,7 +18,8 @@ public class Sounds {
 	public Sounds(){
 	}
 	public void setSourcePath(String src){
-		Sounds.src=src;
+		Sounds.src=src;//System.getProperty("user.dir")+"\\1.1.2a.jar\\+"
+		System.out.println(Sounds.src);
 		clips=new Hashtable<String, Clip>();
 	}
 	public void initialize(ArrayList<String> soundPaths){
@@ -92,5 +93,10 @@ public class Sounds {
     public void resumeSound(String Name){
     	Clip clip=clips.get(Name);
     	clip.start();
+    }
+    public void close(){
+    	for (String k:clips.keySet()){
+    		clips.get(k).close();
+    	}
     }
 }

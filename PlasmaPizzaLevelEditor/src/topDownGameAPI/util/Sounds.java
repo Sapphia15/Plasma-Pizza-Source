@@ -16,8 +16,9 @@ public class Sounds {
 	static String src; //source path for sounds
 	public Sounds(){
 	}
-	public void setSourcePath(String src){
-		Sounds.src=src;
+	public static void setSourcePath(String src){
+		Sounds.src=System.getProperty("user.dir")+src;
+		System.out.println(Sounds.src);
 	}
 	public void initialize(ArrayList<String> soundPaths){
 		BufferedClips=new Hashtable<String, Clip>();

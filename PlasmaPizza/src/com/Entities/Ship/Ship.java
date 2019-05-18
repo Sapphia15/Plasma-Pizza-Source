@@ -25,6 +25,7 @@ import javax.swing.Timer;
 
 import com.Frame;
 import com.Panel;
+import com.Entities.ScrapProcessor;
 import com.Entities.Projectiles.Missile;
 
 import topDownGameAPI.Sprite;
@@ -49,15 +50,15 @@ public class Ship extends Sprite{
 	public Ship(int x, int y, int orientation){
 		super(x,y,orientation);
 		try {
-			imgs.put(d.toString(Direction.RIGHT),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/d2d3fc70-f670-11e7-ace7-153b3595bcca.gif")).getImage());
-			imgs.put(d.toString(Direction.UP),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/f271cb47-f670-11e7-b5c0-153b3595bcca.gif")).getImage());
-			imgs.put(d.toString(Direction.LEFT),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/1b0f038f-f671-11e7-906d-153b3595bcca.gif")).getImage());
-			imgs.put(d.toString(Direction.DOWN),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/31c1f5e6-f671-11e7-a7e3-153b3595bcca.gif")).getImage());
-			imgs.put("shieldA", new ImageIcon("src/images/forceFieldA.gif").getImage());
-			imgs.put("shieldB", new ImageIcon("src/images/forceFieldB.gif").getImage());
-			imgs.put("shieldC", new ImageIcon("src/images/forceFieldC.gif").getImage());
-			imgs.put("shieldD", new ImageIcon("src/images/forceFieldD.gif").getImage());
-			imgs.put("shieldE", new ImageIcon("src/images/forceFieldE.gif").getImage());
+			imgs.put(Direction.toString(Direction.RIGHT),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/d2d3fc70-f670-11e7-ace7-153b3595bcca.gif")).getImage());
+			imgs.put(Direction.toString(Direction.UP),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/f271cb47-f670-11e7-b5c0-153b3595bcca.gif")).getImage());
+			imgs.put(Direction.toString(Direction.LEFT),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/1b0f038f-f671-11e7-906d-153b3595bcca.gif")).getImage());
+			imgs.put(Direction.toString(Direction.DOWN),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/31c1f5e6-f671-11e7-a7e3-153b3595bcca.gif")).getImage());
+			imgs.put("shieldA", new ImageIcon("images/forceFieldA.gif").getImage());
+			imgs.put("shieldB", new ImageIcon("images/forceFieldB.gif").getImage());
+			imgs.put("shieldC", new ImageIcon("images/forceFieldC.gif").getImage());
+			imgs.put("shieldD", new ImageIcon("images/forceFieldD.gif").getImage());
+			imgs.put("shieldE", new ImageIcon("images/forceFieldE.gif").getImage());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -65,7 +66,7 @@ public class Ship extends Sprite{
 		missiles = new ArrayList<Missile>();
 		shots=40;
 		MissleShotTime=System.currentTimeMillis()-250;
-		image=imgs.get(d.toString(orientation));
+		image=imgs.get(Direction.toString(orientation));
 		getImageDimensions();
 		t=new techScreen();
 		b=new buildScreen();
@@ -73,7 +74,7 @@ public class Ship extends Sprite{
 		boosted=false;
 		forceFieldLevel=0;
 		HP=1;
-		scraps=0;
+		scraps=15;
 	}
 	public void move(){
 		x+=dx;
@@ -92,7 +93,7 @@ public class Ship extends Sprite{
 		return scraps;
 	}
 	public Image getImg(){
-		return imgs.get(d.toString(orientation));
+		return imgs.get(Direction.toString(orientation));
 	}
 	public void addTechPoints(int no){
 		techPoints=techPoints+no;
@@ -168,11 +169,30 @@ public class Ship extends Sprite{
         		b.setVisible(true);
         	}
         }
+        
+        if (key == KeyEvent.VK_E){
+        	System.out.println("E pressed");
+        	for (ScrapProcessor s:Frame.board.scrapProcessors){
+        		System.out.println("Looking");
+        		if (getBounds().intersects(s.getBounds())){
+        			dx=0;
+        			dy=0;
+        			s.interact();
+        		}
+        	}
+        }
+        
         if (changeSpeed){
-        	dx=d.getXMod(orientation)*speed;
-        	dy=d.getYMod(orientation)*speed;
+        	dx=Direction.getXMod(orientation)*speed;
+        	dy=Direction.getYMod(orientation)*speed;
         }
 	}
+	
+	public void stop(){
+		dx=0;
+		dy=0;
+	}
+	
 	public Image getForceFieldImage(){
 		if (HP==1){
 			return null;

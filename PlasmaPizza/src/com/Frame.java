@@ -16,8 +16,24 @@ public class Frame{
 	 */
 	public Frame(int levelX,int levelY) {
 		System.out.println("Test level initializing...");
-		String[] args = {String.valueOf(levelX),String.valueOf(levelY)};
-		main(args);
+		f=new JFrame();
+		f.setPreferredSize(new Dimension(929,929));//maximum visible value is 927 minimum visible is 0
+		f.setResizable(false);
+		f.pack();
+		f.setTitle("Plasma Pizza");
+		
+		f.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		f.setLocationRelativeTo(null);
+		try {
+			board=new Panel();
+			f.add(board);
+			f.setVisible(true);
+			board.load(levelX,levelY);
+		} catch (InterruptedException e){
+			
+			e.printStackTrace();
+			
+		}
 	}
 	
 	public static void main(String[] args){

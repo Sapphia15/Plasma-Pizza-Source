@@ -37,7 +37,6 @@ public class Sectors {
 		AlienBVs=new Hashtable<String,ArrayList<AlienBV>>();
 		Walls=new Hashtable<String,ArrayList<Wall>>();
 		scrapProcessors=new Hashtable<String,ArrayList<ScrapProcessor>>();
-		d=new Direction();
 		loadedSectors=new ArrayList<String>();
 		clearedSectors=new ArrayList<String>();
 	}
@@ -51,7 +50,6 @@ public class Sectors {
 		AlienBVs=new Hashtable<String,ArrayList<AlienBV>>();
 		Walls=new Hashtable<String,ArrayList<Wall>>();
 		scrapProcessors=new Hashtable<String,ArrayList<ScrapProcessor>>();
-		d=new Direction();
 		loadedSectors=new ArrayList<String>();
 		clearedSectors=new ArrayList<String>();
 		loadTestSector(x,y);
@@ -62,10 +60,10 @@ public class Sectors {
 		//Read the file of the sector
 		BufferedReader reader = null;
 		try {
-			reader=new BufferedReader(new FileReader("src/levels/"+x+"y"+y+".txt"));
+			reader=new BufferedReader(new FileReader("levels/"+x+"y"+y+".txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			System.err.println("Could not find file of sector: src/levels/"+x+"y"+y+".txt");
+			System.err.println("Could not find file of sector: levels/"+x+"y"+y+".txt");
 		}
 		String text="start";
 		int line=0;
@@ -76,7 +74,7 @@ public class Sectors {
 				
 			} catch (IOException e) {
 				e.printStackTrace();
-				System.err.println("Could not read text of sector: src/levels/"+x+"y"+y+".txt");
+				System.err.println("Could not read text of sector: levels/"+x+"y"+y+".txt");
 				return;
 			}
 			line=line+1;
@@ -92,6 +90,7 @@ public class Sectors {
 		AlienBHs.put(x+"y"+y, new ArrayList<AlienBH>());
 		AlienBVs.put(x+"y"+y, new ArrayList<AlienBV>());
 		Walls.put(x+"y"+y, new ArrayList<Wall>());
+		scrapProcessors.put(x+"y"+y,new ArrayList<ScrapProcessor>());
 		while(text!="stop"){
 			
 			line++;
@@ -160,6 +159,7 @@ public class Sectors {
 	//reads a sector if it is not already loaded 
 		public void loadTestSector(int x, int y){
 			//Read the file of the sector
+			loadedSectors.add(x+"y"+y);
 			BufferedReader reader = null;
 			try {
 				reader=new BufferedReader(new FileReader("temp/"+x+"y"+y+".txt"));
@@ -191,6 +191,7 @@ public class Sectors {
 			AlienBHs.put(x+"y"+y, new ArrayList<AlienBH>());
 			AlienBVs.put(x+"y"+y, new ArrayList<AlienBV>());
 			Walls.put(x+"y"+y, new ArrayList<Wall>());
+			scrapProcessors.put(x+"y"+y,new ArrayList<ScrapProcessor>());
 			while(text!="stop"){
 				
 				line++;
@@ -273,15 +274,12 @@ public class Sectors {
 		return scrapProcessors.get(x+"y"+y);
 	}
 	//saves the current state of the level temporarily to reloaded later
-	public void archiveLevel(ArrayList<AlienA> aAs, ArrayList<AlienBH> aBHs, ArrayList<AlienBV> aBVs, ArrayList<ScrapProcessor> sPs){
+	public void archiveLevel(ArrayList<AlienA> aAs, ArrayList<AlienBH> aBHs, ArrayList<AlienBV> aBVs, ArrayList<Wall> ws, ArrayList<ScrapProcessor> sPs){
 		AlienAs.get(x+"y"+y).addAll(aAs);
 		AlienBHs.get(x+"y"+y).addAll(aBHs);
 		AlienBVs.get(x+"y"+y).addAll(aBVs);
-		try {
-			scrapProcessors.get(x+"y"+y).addAll(sPs);
-		} catch (NullPointerException e){
-	
-		}
+		Walls.get(x+"y"+y).addAll(ws);
+		scrapProcessors.get(x+"y"+y).addAll(sPs);
 		loadedSectors.add(x+"y"+y);
 	}
 	//function for marking levels as cleared
@@ -290,8 +288,8 @@ public class Sectors {
 	}
 	//function for moving from sector to sector
 	public void move(int direction){
-		this.x=x+d.getXMod(direction);
-		this.y=y+d.getYMod(direction);
+		this.x=x+Direction.getXMod(direction);
+		this.y=y+Direction.getYMod(direction);
 	}
 	//functions that add sprites to level
 	

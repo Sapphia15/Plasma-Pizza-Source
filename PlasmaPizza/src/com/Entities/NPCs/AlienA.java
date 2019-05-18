@@ -27,15 +27,15 @@ public class AlienA extends Sprite{
 		return scraps;
 	}
 	public void move() {
-		x=x+d.getXMod(orientation)*2;
-		y=y+d.getYMod(orientation)*2;
+		x=x+Direction.getXMod(orientation)*2;
+		y=y+Direction.getYMod(orientation)*2;
 		if (x>SCREEN_WIDTH-32 || x<2){
 			if (orientation==Direction.RIGHT || orientation==Direction.LEFT){
-				orientation=d.getOpposite(orientation);
+				orientation=Direction.getOpposite(orientation);
 			}
 		} else if(y<2 || y>870){
 			if (orientation==Direction.UP || orientation==Direction.DOWN){
-				orientation=d.getOpposite(orientation);
+				orientation=Direction.getOpposite(orientation);
 			}
 			
 		}

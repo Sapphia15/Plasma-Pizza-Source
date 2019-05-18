@@ -12,10 +12,12 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.FocusListener;
 import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -44,15 +46,15 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Ship ship;
+	public Ship ship;
 	private Timer timer;
-	private ArrayList<AlienA> alienAs;
-	private ArrayList<AlienBV> alienBVs;
-	private ArrayList<AlienBH> alienBHs;
-	private ArrayList<Explosion> explosions;
-	private ArrayList<Wall> walls;
-	private ArrayList<Scrap> scraps;
-	private ArrayList<ScrapProcessor> scrapProcessors;
+	public ArrayList<AlienA> alienAs;
+	public ArrayList<AlienBV> alienBVs;
+	public ArrayList<AlienBH> alienBHs;
+	public ArrayList<Explosion> explosions;
+	public ArrayList<Wall> walls;
+	public ArrayList<Scrap> scraps;
+	public ArrayList<ScrapProcessor> scrapProcessors;
 	private Hashtable<String,Image>loadedImages;
     private boolean ingame;
     private final int ICRAFT_X = 40;
@@ -67,7 +69,6 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
     private boolean paused;
     private boolean musicEnabled;
     private Sectors sectors;
-    private Direction d;
     Graphics g;
     private Random Rand=new Random();
     public int sectorsCleared;
@@ -110,22 +111,22 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		//load sounds
 		System.out.println("Loading Sounds...");
 		sound=new Sounds();
-		sound.setSourcePath("src/sounds/");
+		sound.setSourcePath("sounds/");
 		sound.initialize(soundPaths);
 		sound.playSoundOnLoop("The-Happy-New.wav", 100);
         System.out.println("Arrays Loaded");
 		System.out.println("Loading Images...");
-		loadedImages.put("musicIconA",new ImageIcon("src/images/musicIconA.gif").getImage());
-		loadedImages.put("musicIconB",new ImageIcon("src/images/musicIconB.gif").getImage());
+		loadedImages.put("musicIconA",new ImageIcon("images/musicIconA.gif").getImage());
+		loadedImages.put("musicIconB",new ImageIcon("images/musicIconB.gif").getImage());
 		repaint();
         System.out.println("Images Loaded");
-        d=new Direction();
         System.out.println("Launching Game");
 		ship=new Ship(423, 423, Direction.RIGHT);
 		addKeyListener(new TAdapter());
 		addMouseListener(new MAdapter());
+		addFocusListener(new focusListener());
 		sectors=new Sectors();
-		lvInitAliens();
+		lvInit();
 		timer = new Timer(DELAY, this);
 		loading=false;
 		ingame=false;
@@ -158,6 +159,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
         scraps=new ArrayList<>();
         scrapProcessors=new ArrayList<>();
         ArrayList<String> soundPaths=new ArrayList<>();
+        System.out.println("Arrays Loaded");
         soundPaths.add("ExplosionA.wav");
         soundPaths.add("LaserA.wav");
         soundPaths.add("LaserB.wav");
@@ -167,20 +169,20 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		sound=new Sounds();
 		sound.setSourcePath("sounds/");
 		sound.initialize(soundPaths);
+		System.out.println("Playing The-Happy-New.wav");
 		sound.playSoundOnLoop("The-Happy-New.wav", 100);
-        System.out.println("Arrays Loaded");
+        System.out.println("Sounds Loaded");
 		System.out.println("Loading Images...");
 		loadedImages.put("musicIconA",new ImageIcon("images/musicIconA.gif").getImage());
 		loadedImages.put("musicIconB",new ImageIcon("images/musicIconB.gif").getImage());
 		repaint();
         System.out.println("Images Loaded");
-        d=new Direction();
         System.out.println("Launching Game");
 		ship=new Ship(423, 423, Direction.RIGHT);
 		addKeyListener(new TAdapter());
 		addMouseListener(new MAdapter());
 		sectors=new Sectors(x,y);
-		lvInitAliens();
+		lvInit();
 		timer = new Timer(DELAY, this);
 		loading=false;
 		ingame=false;
@@ -189,7 +191,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		repaint();
 		ingame=true;
 		MessageBox("Test Initialization Protocol Complete","SHIP ITERATION SYSTEM");
-		MessageBox("Galactic Coordinates: X-"+sectors.x+" Y-"+sectors.y,"SHIP NAVIGATION SYSTEM");
+		MessageBox("Galactic Coordinates: X - ("+sectors.x+") Y - ("+sectors.y+")","SHIP NAVIGATION SYSTEM");
         timer.start();
 	}
 	
@@ -227,11 +229,27 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		else if (win){
 			timer.stop();
 			drawText(g, "~YOU WIN~");
-			
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.exit(0);
+			sound.close();
 			
 		} else{
+			sound.close();
 			timer.stop();
 			drawText(g, "--GAME OVER--");
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.exit(0);
+			sound.close();
 		}
 		Toolkit.getDefaultToolkit().sync();
 	}
@@ -359,7 +377,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	
 	//~~level initialization~~
 	
-	public void lvInitAliens(){
+	public void lvInit(){
 		if (!sectors.loadedSectors.contains(sectors.x+"y"+sectors.y)){
 			sectors.loadSector(sectors.x, sectors.y);
 		}
@@ -372,12 +390,12 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		for (AlienBH aBH:sectors.getAlienBHs()){
 			alienBHs.add(aBH);
 		}
-		try{
-			for (Wall w:sectors.getWalls()){
-				walls.add(w);
-			}
-		} catch (NullPointerException e){
-			
+		
+		for (Wall w:sectors.getWalls()){
+			walls.add(w);
+		}
+		for (ScrapProcessor s:sectors.getScrapProcessors()){
+			scrapProcessors.add(s);
 		}
 	}
 	
@@ -424,7 +442,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
             	ingame=false;
             	return;
             }
-            MessageBox("Sector X-"+sectors.x+" Y-"+sectors.y+" cleared!","Congratulational Systems");
+            MessageBox("Sector X - ("+sectors.x+") Y - ("+sectors.y+") cleared!","Congratulational Systems");
             sectors.markSectorCleared();
         }
         
@@ -503,7 +521,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
         	for (AlienA alien:alienAs){
         		Rectangle r2=alien.getBounds();
         		if (r7.intersects(r2)){
-        			alien.setOrientation(d.getOpposite(alien.orientation));
+        			alien.setOrientation(Direction.getOpposite(alien.orientation));
         		}
         	}
         	for (AlienBV alienB:alienBVs){
@@ -674,8 +692,28 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 			}
 		}
 	}
+	
+	private class focusListener implements FocusListener{
+
+		@Override
+		public void focusGained(FocusEvent arg0) {
+			
+		}
+
+		@Override
+		public void focusLost(FocusEvent arg0) {
+			ship.stop();
+			
+		}
+		
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if (!Frame.f.isVisible()){
+			sound.close();
+			timer.stop();
+		}
 		if (!paused){
 			ship.move();
 			updateProjectiles();
@@ -731,10 +769,11 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	
 	public void moveSector(int direction){
 		if (sectors.clearedSectors.contains(sectors.x+"y"+sectors.y)){
-			sectors.archiveLevel(alienAs, alienBHs, alienBVs,scrapProcessors);
+			sectors.archiveLevel(alienAs, alienBHs, alienBVs,walls,scrapProcessors);
 			sectors.move(direction);
 			walls.clear();
-			lvInitAliens();
+			scrapProcessors.clear();
+			lvInit();
 			if (direction==Direction.RIGHT){
 				ship.setLocation(0, ship.getY());
 			} else if (direction==Direction.LEFT){
@@ -745,7 +784,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 				ship.setLocation(ship.getX(), 0);
 			}
 		} else {
-			ship.setLocation(ship.getX()+d.getXMod(d.getOpposite(direction)), ship.getY()+d.getYMod(d.getOpposite(direction)));
+			ship.setLocation(ship.getX()+Direction.getXMod(Direction.getOpposite(direction)), ship.getY()+Direction.getYMod(Direction.getOpposite(direction)));
 		}
 	}
 }
