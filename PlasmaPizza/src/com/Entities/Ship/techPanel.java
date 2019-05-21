@@ -34,8 +34,6 @@ class techPanel extends JPanel implements ActionListener{
 		techImages.put(1, new ImageIcon("images/speedBoost.gif").getImage());
 		techImages.put(2, new ImageIcon("images/forceFieldIcon.gif").getImage());
 		timer.start();
-		availableTech.add(1);
-		availableTech.add(2);
 		techX=0;
 	}
 	@Override
@@ -123,5 +121,13 @@ class techPanel extends JPanel implements ActionListener{
 			
 		}
 		
+	}
+	
+	void setAvailable(int no,boolean b) {
+		if (b) {
+			availableTech.add(no);
+		} else {
+			availableTech.remove(no);
+		}
 	}
 }

@@ -7,6 +7,7 @@ import javax.swing.JRootPane;
 
 class techScreen{
 	JFrame f;
+	techPanel t;
 	public techScreen(){
 		f=new JFrame();
 		f.setVisible(false);
@@ -18,7 +19,8 @@ class techScreen{
 		f.setLocation(f.getX()-762, f.getY()-150);
 		f.setPreferredSize(new Dimension(300,300));
 		f.pack();
-		f.add(new techPanel());
+		t=new techPanel();
+		f.add(t);
 		
 	}
 	public void setVisible(boolean vis){
@@ -27,4 +29,5 @@ class techScreen{
 	public boolean getVisible(){
 		return f.isVisible();
 	}
+	
 }

@@ -120,12 +120,15 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		loadedImages.put("musicIconB",new ImageIcon("images/musicIconB.gif").getImage());
 		repaint();
         System.out.println("Images Loaded");
+        String[] saveFiles= {"Save1","Save2","Save3"};
+        int fileNo=JOptionPane.showOptionDialog(this, "What save file would you like to load?", "Save Files", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, saveFiles, saveFiles[1]);
+        System.out.println("Loading Player Data...");
+        ship=new Ship(423, 423, Direction.RIGHT,saveFiles[fileNo]);
         System.out.println("Launching Game");
-		ship=new Ship(423, 423, Direction.RIGHT);
 		addKeyListener(new TAdapter());
 		addMouseListener(new MAdapter());
 		addFocusListener(new focusListener());
-		sectors=new Sectors();
+		sectors=new Sectors(saveFiles[fileNo]);
 		lvInit();
 		timer = new Timer(DELAY, this);
 		loading=false;
@@ -177,8 +180,13 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		loadedImages.put("musicIconB",new ImageIcon("images/musicIconB.gif").getImage());
 		repaint();
         System.out.println("Images Loaded");
+        //System.out.println("Loading player data...");
         System.out.println("Launching Game");
 		ship=new Ship(423, 423, Direction.RIGHT);
+		ship.addScrap((int)Math.round(Point2D.distance(x, y, 0, 0))*5);
+		ship.addTechPoints((int)Math.round(Point2D.distance(x, y, 0, 0))*5);
+		ship.addShots((int)Math.round(Point2D.distance(x, y, 0, 0))*2);
+		sectorsCleared=(int)Math.round(Point2D.distance(x, y, 0, 0));
 		addKeyListener(new TAdapter());
 		addMouseListener(new MAdapter());
 		sectors=new Sectors(x,y);
@@ -242,6 +250,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	
 	public void doMenuDrawing(Graphics g){
 		Graphics2D g2d=(Graphics2D) g;
+		g2d.drawString("Save", 2, 5);
 		if (musicEnabled){
 			g2d.drawImage(loadedImages.get("musicIconA"),900,860, this);
 		} else {
@@ -663,6 +672,10 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 						musicEnabled=true;
 						sound.resumeSound("The-Happy-New.wav");
 					}
+				}
+				if (e.getX()>=2 && e.getX()<40 && e.getY()>=4 && e.getY()<11){
+					sectors.save();
+					ship.save();
 				}
 			} else {
 				Rectangle r9;
