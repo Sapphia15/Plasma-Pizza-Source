@@ -52,47 +52,15 @@ public class Ship extends Sprite{
 	protected static techScreen t;
 	protected static buildScreen b;
 	protected static int HP;
-	protected static String saveDir;
 	public static int shots;
+	
 	public Ship(int x, int y, int orientation){
 		super(x,y,orientation);
-		try {
-			imgs.put(Direction.toString(Direction.RIGHT),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/d2d3fc70-f670-11e7-ace7-153b3595bcca.gif")).getImage());
-			imgs.put(Direction.toString(Direction.UP),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/f271cb47-f670-11e7-b5c0-153b3595bcca.gif")).getImage());
-			imgs.put(Direction.toString(Direction.LEFT),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/1b0f038f-f671-11e7-906d-153b3595bcca.gif")).getImage());
-			imgs.put(Direction.toString(Direction.DOWN),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/31c1f5e6-f671-11e7-a7e3-153b3595bcca.gif")).getImage());
-			imgs.put("shieldA", new ImageIcon("images/forceFieldA.gif").getImage());
-			imgs.put("shieldB", new ImageIcon("images/forceFieldB.gif").getImage());
-			imgs.put("shieldC", new ImageIcon("images/forceFieldC.gif").getImage());
-			imgs.put("shieldD", new ImageIcon("images/forceFieldD.gif").getImage());
-			imgs.put("shieldE", new ImageIcon("images/forceFieldE.gif").getImage());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		isForceFieldActive=false;
-		missiles = new ArrayList<Missile>();
-		shots=40;
-		MissleShotTime=System.currentTimeMillis()-250;
-		image=imgs.get(Direction.toString(orientation));
-		getImageDimensions();
-		t=new techScreen();
-		b=new buildScreen();
-		speed=1;
-		boosted=false;
-		forceFieldLevel=0;
-		HP=1;
-		scraps=0;
-		t.t.setAvailable(1, true);
-		t.t.setAvailable(2, true);
-				
-	}
-	
-	public Ship(int x, int y, int orientation,String saveDir){
-		super(x,y,orientation);
 		MissleShotTime=System.currentTimeMillis()-250;
 		missiles = new ArrayList<Missile>();
 		t=new techScreen();
 		b=new buildScreen();
+		
 		try {
 			imgs.put(Direction.toString(Direction.RIGHT),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/d2d3fc70-f670-11e7-ace7-153b3595bcca.gif")).getImage());
 			imgs.put(Direction.toString(Direction.UP),new ImageIcon(new URL("https://piskel-imgstore-b.appspot.com/img/f271cb47-f670-11e7-b5c0-153b3595bcca.gif")).getImage());
@@ -110,7 +78,7 @@ public class Ship extends Sprite{
 		//Read the file of the sector
 		BufferedReader reader = null;
 		try {
-			reader=new BufferedReader(new FileReader(saveDir+"ship.txt"));
+			reader=new BufferedReader(new FileReader(Panel.saveDir+"ship.txt"));
 			String text="start";
 			int line=0;
 			Hashtable<Integer,String> fileText=new Hashtable<>();
@@ -130,10 +98,15 @@ public class Ship extends Sprite{
 			shots=Integer.parseInt(fileText.get(2));
 			speed=Integer.parseInt(fileText.get(3));
 			boosted=fileText.get(4).equals("true");
-			forceFieldLevel=Integer.parseInt(fileText.get(5));
-			HP=Integer.parseInt(fileText.get(6));
-			scraps=Integer.parseInt(fileText.get(7));
-			line=8;
+			canBoost=fileText.get(5).equals("true");
+			forceFieldLevel=Integer.parseInt(fileText.get(6));
+			HP=Integer.parseInt(fileText.get(7));
+			techPoints=Integer.parseInt(fileText.get(8));
+			scraps=Integer.parseInt(fileText.get(9));
+			this.x=Integer.parseInt(fileText.get(10));
+			this.y=Integer.parseInt(fileText.get(11));
+			line=12;
+			text=fileText.get(line);
 			while (text!="stop") {
 				text=fileText.get(line);
 				if (text.equals("tech")) {
@@ -141,6 +114,13 @@ public class Ship extends Sprite{
 					t.t.setAvailable(Integer.parseInt(fileText.get(line)), true);
 				}
 				line++;
+				
+			}
+			try {
+				reader.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		} catch (FileNotFoundException loadAsNewLevelInstance) {
 			isForceFieldActive=false;
@@ -329,20 +309,13 @@ public class Ship extends Sprite{
 	public void save() {
 		BufferedWriter writer;
 		try {
-			File f=new File(saveDir+"ship.txt");
-			System.out.println(f.delete());
-			if (!f.exists()) {
-				f=new File(saveDir+"ship.txt");
+			File f=new File(Panel.saveDir+"ship.txt");
+			if (f.exists()){
+				f.delete();
 			}
-			/*
-			 * isForceFieldActive=fileText.get(1).equals("true");
-			shots=Integer.parseInt(fileText.get(2));
-			speed=Integer.parseInt(fileText.get(3));
-			boosted=fileText.get(4).equals("true");
-			forceFieldLevel=Integer.parseInt(fileText.get(5));
-			HP=Integer.parseInt(fileText.get(6));
-			scraps=Integer.parseInt(fileText.get(7));
-			 * */
+		
+			f=new File(Panel.saveDir+"ship.txt");
+			
 			writer=new BufferedWriter(new FileWriter(f));
 			writer.write(String.valueOf(isForceFieldActive));
 			writer.newLine();
@@ -352,16 +325,24 @@ public class Ship extends Sprite{
 			writer.newLine();
 			writer.write(String.valueOf(boosted));
 			writer.newLine();
+			writer.write(String.valueOf(canBoost));
+			writer.newLine();
 			writer.write(String.valueOf(forceFieldLevel));
 			writer.newLine();
 			writer.write(String.valueOf(HP));
 			writer.newLine();
+			writer.write(String.valueOf(techPoints));
+			writer.newLine();
 			writer.write(String.valueOf(scraps));
+			writer.newLine();
+			writer.write(String.valueOf(x));
+			writer.newLine();
+			writer.write(String.valueOf(y));
 			writer.newLine();
 			for (int i:t.t.availableTech) {
 				writer.write("tech");
 				writer.newLine();
-				writer.write(i);
+				writer.write(String.valueOf(i));
 				writer.newLine();
 			}
 			writer.close();

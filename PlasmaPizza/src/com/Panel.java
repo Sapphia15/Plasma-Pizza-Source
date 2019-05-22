@@ -48,31 +48,32 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	private static final long serialVersionUID = 1L;
 	public Ship ship;
 	protected Timer timer;
-	public ArrayList<AlienA> alienAs;
-	public ArrayList<AlienBV> alienBVs;
-	public ArrayList<AlienBH> alienBHs;
-	public ArrayList<Explosion> explosions;
-	public ArrayList<Wall> walls;
-	public ArrayList<Scrap> scraps;
-	public ArrayList<ScrapProcessor> scrapProcessors;
-	private Hashtable<String,Image>loadedImages;
-    private boolean ingame;
-    private final int ICRAFT_X = 40;
-    private final int ICRAFT_Y = 60;
-    public final int B_WIDTH = 929;
-    public final int B_HEIGHT = 902;
-    private final int DELAY = 10;
-    private boolean init;
-    private boolean win;
-    private boolean loading;
-    private boolean timerWasRunning;
-    private boolean paused;
-    private boolean musicEnabled;
-    private Sectors sectors;
-    Graphics g;
-    private Random Rand=new Random();
-    public int sectorsCleared;
-    final long DURATION_EXPLOSION=(long)1714;
+	public static ArrayList<AlienA> alienAs;
+	public static ArrayList<AlienBV> alienBVs;
+	public static ArrayList<AlienBH> alienBHs;
+	public static ArrayList<Explosion> explosions;
+	public static ArrayList<Wall> walls;
+	public static ArrayList<Scrap> scraps;
+	public static ArrayList<ScrapProcessor> scrapProcessors;
+	private static Hashtable<String,Image>loadedImages;
+    private static boolean ingame;
+    private static final int ICRAFT_X = 40;
+    private static final int ICRAFT_Y = 60;
+    public static final int B_WIDTH = 929;
+    public static final int B_HEIGHT = 902;
+    private static final int DELAY = 10;
+    private static boolean init;
+    private static boolean win;
+    private static boolean loading;
+    private static boolean timerWasRunning;
+    private static boolean paused;
+    private static boolean musicEnabled;
+    private static Sectors sectors;
+    static Graphics g;
+    private static Random Rand=new Random();
+    public static int sectorsCleared;
+    public static String saveDir;
+    final static long DURATION_EXPLOSION=(long)1714;
     Sounds sound;
     //private Thread animator;
     
@@ -120,21 +121,62 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		loadedImages.put("musicIconB",new ImageIcon("images/musicIconB.gif").getImage());
 		repaint();
         System.out.println("Images Loaded");
-        String[] saveFiles= {"Save1","Save2","Save3"};
+        String[] saveFiles= {"Save1","Save2","Save3","Save4","Save5","Save6","temp"};
         int fileNo=JOptionPane.showOptionDialog(this, "What save file would you like to load?", "Save Files", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, saveFiles, saveFiles[1]);
+        
+        if (saveFiles[fileNo].equals("temp")){
+        	saveDir="temp/";
+        } else {
+        	saveDir="saves/"+saveFiles[fileNo]+"/";
+        }
+        //load player data
         System.out.println("Loading Player Data...");
-        ship=new Ship(423, 423, Direction.RIGHT,saveFiles[fileNo]);
+        
+        //make directories
+        {
+        File saveFolder=new File(saveDir);
+        saveFolder.mkdirs();
+        File sectorFolder=new File(saveDir+"sectors");
+        sectorFolder.mkdir();
+        }
+        ship=new Ship(423, 423, Direction.RIGHT);
         System.out.println("Launching Game");
 		addKeyListener(new TAdapter());
 		addMouseListener(new MAdapter());
 		addFocusListener(new focusListener());
-		sectors=new Sectors(saveFiles[fileNo]);
+		BufferedReader reader;
+			try {
+				reader= new BufferedReader(new FileReader(saveDir+"/"+"panelInf.txt"));
+				String text="start";
+				int line=0;
+				Hashtable<Integer,String> fileText=new Hashtable<>();
+				while (text!=null) {
+					try {
+						fileText.put(line,text);
+						text=reader.readLine();
+					} catch (IOException e) {
+						
+					}
+					line=line+1;
+					
+				}
+				fileText.put(line, "stop");
+				sectors=new Sectors(saveDir+"sectors/",Integer.parseInt(fileText.get(1)),Integer.parseInt(fileText.get(2)));
+				sectorsCleared=sectors.clearedSectors.size();
+				musicEnabled=fileText.get(3).equals("true");
+				if (!musicEnabled){
+					sound.pauseSound("The-Happy-New.wav");
+				}
+				
+			} catch (FileNotFoundException e1) {
+				sectors=new Sectors(saveDir+"sectors/");
+				musicEnabled=true;
+			}
 		lvInit();
 		timer = new Timer(DELAY, this);
 		loading=false;
 		ingame=false;
 		paused=false;
-		musicEnabled=true;
 		repaint();
 		ingame=true;
 		MessageBox("Galactic Coordinates: X-"+sectors.x+" Y-"+sectors.y,"SHIP NAVIGATION SYSTEM");
@@ -149,8 +191,10 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	 */
 	public void load(int x,int y) throws InterruptedException{
 		init=true;
+		ingame=false;
 		repaint();
 		System.out.println("Test Level ("+x+","+y+") loading...");
+		saveDir="temp/";
 		win=false;
 		sectorsCleared=0;
 		System.out.println("Loading Arrays...");
@@ -178,9 +222,14 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		System.out.println("Loading Images...");
 		loadedImages.put("musicIconA",new ImageIcon("images/musicIconA.gif").getImage());
 		loadedImages.put("musicIconB",new ImageIcon("images/musicIconB.gif").getImage());
-		repaint();
         System.out.println("Images Loaded");
-        //System.out.println("Loading player data...");
+        //make directories
+        {
+            File saveFolder=new File(saveDir);
+            saveFolder.mkdir();
+            File sectorFolder=new File(saveDir+"sectors");
+            sectorFolder.mkdir();
+        }
         System.out.println("Launching Game");
 		ship=new Ship(423, 423, Direction.RIGHT);
 		ship.addScrap((int)Math.round(Point2D.distance(x, y, 0, 0))*5);
@@ -193,7 +242,6 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		lvInit();
 		timer = new Timer(DELAY, this);
 		loading=false;
-		ingame=false;
 		paused=false;
 		musicEnabled=true;
 		repaint();
@@ -250,7 +298,8 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	
 	public void doMenuDrawing(Graphics g){
 		Graphics2D g2d=(Graphics2D) g;
-		g2d.drawString("Save", 2, 5);
+		g2d.setColor(Color.white);
+		g2d.drawString("Save", 2, 17);
 		if (musicEnabled){
 			g2d.drawImage(loadedImages.get("musicIconA"),900,860, this);
 		} else {
@@ -673,9 +722,12 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 						sound.resumeSound("The-Happy-New.wav");
 					}
 				}
-				if (e.getX()>=2 && e.getX()<40 && e.getY()>=4 && e.getY()<11){
+				if (e.getX()>=2 && e.getX()<=28 && e.getY()>=6 && e.getY()<=17){
+					System.out.println("Saving...");
 					sectors.save();
 					ship.save();
+					save();
+					System.out.println("Game Saved");
 				}
 			} else {
 				Rectangle r9;
@@ -702,6 +754,31 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 			
 		}
 		
+	}
+	
+	public void save(){
+		BufferedWriter writer;
+		try {
+			File f=new File(Panel.saveDir+"paneInf.txt");
+			if (f.exists()){
+				f.delete();
+			}
+			if (!f.exists()) {
+				f=new File(Panel.saveDir+"panelInf.txt");
+			}
+			writer=new BufferedWriter(new FileWriter(f));
+			writer.write(String.valueOf(sectors.x));
+			writer.newLine();
+			writer.write(String.valueOf(sectors.y));
+			writer.newLine();
+			writer.write(String.valueOf(musicEnabled));
+			
+			writer.close();
+			MessageBox("Data saved successfully.","Ship Memory Systems");
+		} catch (IOException e) {
+			e.printStackTrace();
+			MessageBox("MEMORY ERROR: failed to save data", "Ship Memory Systems");
+		}
 	}
 	
 	@Override
@@ -755,7 +832,9 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 	
 	
 	
-	
+	public void dispose(){
+		AlienBV.lasers.clear();
+	}
 	
 	//function to move sector from ship class
 	

@@ -34,7 +34,7 @@ public class Sectors {
 	//Used to determine what sectors have been loaded or cleared by testing weather the string 'x+"y"+y' is contained within the array list
 	ArrayList<String> loadedSectors;
 	ArrayList<String> clearedSectors;
-	String saveDir;
+	String sectorDir;
 	public Sectors(String saveDir){
 		x=0;
 		y=0;
@@ -46,7 +46,8 @@ public class Sectors {
 		scrapProcessors=new Hashtable<String,ArrayList<ScrapProcessor>>();
 		loadedSectors=new ArrayList<String>();
 		clearedSectors=new ArrayList<String>();
-		this.saveDir=saveDir;
+		
+		this.sectorDir=saveDir;
 	}
 	
 	public Sectors(int x,int y){
@@ -60,8 +61,56 @@ public class Sectors {
 		scrapProcessors=new Hashtable<String,ArrayList<ScrapProcessor>>();
 		loadedSectors=new ArrayList<String>();
 		clearedSectors=new ArrayList<String>();
-		saveDir="temp/";
+		sectorDir="temp/";
 		loadTestSector(x,y);
+	}
+	
+	public Sectors(String saveDir,int x,int y){
+		this.x=x;
+		this.y=y;
+		fileText=new Hashtable<String,String>();
+		AlienAs=new Hashtable<String,ArrayList<AlienA>>();
+		AlienBHs=new Hashtable<String,ArrayList<AlienBH>>();
+		AlienBVs=new Hashtable<String,ArrayList<AlienBV>>();
+		Walls=new Hashtable<String,ArrayList<Wall>>();
+		scrapProcessors=new Hashtable<String,ArrayList<ScrapProcessor>>();
+		loadedSectors=new ArrayList<String>();
+		clearedSectors=new ArrayList<String>();
+		this.sectorDir=saveDir;
+		BufferedReader reader;
+		try {
+			reader= new BufferedReader(new FileReader(saveDir+"/"+"sectorInf.txt"));
+			String text="start";
+			int line=0;
+			Hashtable<Integer,String> fileText=new Hashtable<>();
+			while (text!=null) {
+				try {
+					fileText.put(line,text);
+					text=reader.readLine();
+				} catch (IOException e) {
+					
+				}
+				line=line+1;
+				
+			}
+			fileText.put(line, "stop");
+			line=1;
+			text=fileText.get(line);
+			while (text!="stop"){
+				clearedSectors.add(text);
+				line++;
+				text=fileText.get(line);
+			}
+			try {
+				reader.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e1) {
+			
+		}
+		loadSector(x,y);
 	}
 	
 	//reads a sector if it is not already loaded 
@@ -78,7 +127,7 @@ public class Sectors {
 		//Read the file of the sector
 		BufferedReader reader = null;
 		try {
-			reader=new BufferedReader(new FileReader(saveDir+x+"y"+y+".txt"));
+			reader=new BufferedReader(new FileReader(sectorDir+x+"y"+y+".txt"));
 		} catch (FileNotFoundException loadAsNewLevelInstance) {
 			try {
 				reader=new BufferedReader(new FileReader(path+x+"y"+y+".txt"));
@@ -191,10 +240,10 @@ public class Sectors {
 	
 	public void save(int x,int y){
 		try {
-			File f=new File(saveDir+x+"y"+y+".txt");
+			File f=new File(sectorDir+x+"y"+y+".txt");
 			System.out.println(f.delete());
 			if (!f.exists()) {
-				f=new File(saveDir+x+"y"+y+".txt");
+				f=new File(sectorDir+x+"y"+y+".txt");
 			}
 			writer=new BufferedWriter(new FileWriter(f));
 		} catch (IOException e) {
@@ -205,7 +254,7 @@ public class Sectors {
 			try {
 				writer.write("AlienA");
 				writer.newLine();
-				writer.write(Integer.toString(AlienAs.size()));
+				writer.write(Integer.toString(AlienAs.get(x+"y"+y).size()));
 				writer.newLine();
 				for (AlienA a:AlienAs.get(x+"y"+y)){
 					
@@ -226,7 +275,7 @@ public class Sectors {
 			try {
 				writer.write("AlienBV");
 				writer.newLine();
-				writer.write(Integer.toString(AlienBVs.size()));
+				writer.write(Integer.toString(AlienBVs.get(x+"y"+y).size()));
 				writer.newLine();
 				for (AlienBV a:AlienBVs.get(x+"y"+y)){
 					
@@ -247,7 +296,7 @@ public class Sectors {
 			try {
 				writer.write("AlienBH");
 				writer.newLine();
-				writer.write(Integer.toString(AlienBHs.size()));
+				writer.write(Integer.toString(AlienBHs.get(x+"y"+y).size()));
 				writer.newLine();
 				for (AlienBH a:AlienBHs.get(x+"y"+y)){
 					
@@ -296,20 +345,43 @@ public class Sectors {
 				e.printStackTrace();
 			}
 		}
+		
+	}
+	
+	public void save() {
+		archiveLevel(Frame.board.alienAs, Frame.board.alienBHs, Frame.board.alienBVs,Frame.board.walls,Frame.board.scrapProcessors);
+		for (String key:loadedSectors) {
+			int yIndex=key.lastIndexOf("y");
+			save(Integer.parseInt(key.substring(0, yIndex)),Integer.parseInt(key.substring(yIndex+1)));
+		}
 		try {
-				
+			
 			writer.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	public void save() {
-		for (String key:loadedSectors) {
-			int yIndex=key.lastIndexOf("y");
-			save(Integer.parseInt(key.substring(0, yIndex)),Integer.parseInt(key.substring(yIndex)));
+		try {
+			File f=new File(sectorDir+"sectorInf.txt");
+			f.delete();
+			f=new File(sectorDir+"sectorInf.txt");
+			writer=new BufferedWriter(new FileWriter(f));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		try {
+			
+			for (String s:clearedSectors){
+				writer.write(s);
+				writer.newLine();
+			}
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 			
 			
@@ -332,6 +404,11 @@ public class Sectors {
 	}
 	//saves the current state of the level temporarily to reloaded later
 	public void archiveLevel(ArrayList<AlienA> aAs, ArrayList<AlienBH> aBHs, ArrayList<AlienBV> aBVs, ArrayList<Wall> ws, ArrayList<ScrapProcessor> sPs){
+		AlienAs.get(x+"y"+y).clear();
+		AlienBHs.get(x+"y"+y).clear();
+		AlienBVs.get(x+"y"+y).clear();
+		Walls.get(x+"y"+y).clear();
+		scrapProcessors.get(x+"y"+y).clear();
 		AlienAs.get(x+"y"+y).addAll(aAs);
 		AlienBHs.get(x+"y"+y).addAll(aBHs);
 		AlienBVs.get(x+"y"+y).addAll(aBVs);

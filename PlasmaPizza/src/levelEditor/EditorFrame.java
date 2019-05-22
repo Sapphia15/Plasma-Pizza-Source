@@ -20,6 +20,7 @@ public class EditorFrame{
 		f.add(p);
 		f.setVisible(true);
 		f.setLocationRelativeTo(null);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		String[] options={"Load","New"};
 		int Load=JOptionPane.showOptionDialog(f, "Would you like to load a file?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,options, options[1]);
 		x=Integer.parseInt(JOptionPane.showInputDialog("Sector X Coordinate", "0"));

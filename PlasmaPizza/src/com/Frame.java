@@ -22,6 +22,7 @@ public class Frame{
 				board.sound.close();
 				board.timer.stop();
 				f.removeAll();
+				board.dispose();
 				board=null;
 			}
 		};
