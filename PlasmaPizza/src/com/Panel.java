@@ -114,7 +114,7 @@ public class Panel extends JPanel implements /*Runnable,*/ ActionListener{
 		sound=new Sounds();
 		sound.setSourcePath("sounds/");
 		sound.initialize(soundPaths);
-		sound.playSoundOnLoop("The-Happy-New.wav", 100);
+		sound.playSoundOnLoop("PlasmaPizzaSongs.wav", 100);
         System.out.println("Arrays Loaded");
 		System.out.println("Loading Images...");
 		loadedImages.put("musicIconA",new ImageIcon("images/musicIconA.gif").getImage());

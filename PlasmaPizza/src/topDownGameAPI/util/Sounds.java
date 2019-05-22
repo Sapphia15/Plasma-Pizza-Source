@@ -86,6 +86,7 @@ public class Sounds {
 		}
 		
     }
+	
     public void pauseSound(String Name){
     	Clip clip=clips.get(Name);
 		clip.stop();
