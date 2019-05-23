@@ -235,16 +235,15 @@ public class Sectors {
 				}
 				
 			}
-		}		
+		}	
+		
 	}
 	
 	public void save(int x,int y){
 		try {
 			File f=new File(sectorDir+x+"y"+y+".txt");
-			System.out.println(f.delete());
-			if (!f.exists()) {
-				f=new File(sectorDir+x+"y"+y+".txt");
-			}
+			f.delete();
+			f=new File(sectorDir+x+"y"+y+".txt");
 			writer=new BufferedWriter(new FileWriter(f));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -319,11 +318,12 @@ public class Sectors {
 				writer.write("Wall");
 				writer.newLine();
 				writer.write(Integer.toString(Walls.get(x+"y"+y).size()));
+				writer.newLine();
 				for (Wall w:Walls.get(x+"y"+y)){
-					writer.newLine();
 					writer.write(Integer.toString(w.getX()));
 					writer.newLine();
 					writer.write(Integer.toString(w.getY()));
+					writer.newLine();
 				}
 			} catch (IOException e){
 				e.printStackTrace();
@@ -335,15 +335,23 @@ public class Sectors {
 				writer.write("ScrapProcessor");
 				writer.newLine();
 				writer.write(Integer.toString(scrapProcessors.get(x+"y"+y).size()));
+				writer.newLine();
 				for (ScrapProcessor sp:scrapProcessors.get(x+"y"+y)){
-					writer.newLine();
 					writer.write(Integer.toString(sp.getX()));
 					writer.newLine();
 					writer.write(Integer.toString(sp.getY()));
+					writer.newLine();
 				}
 			} catch (IOException e){
 				e.printStackTrace();
 			}
+		}
+		
+		try {
+			writer.close();
+		} catch (IOException e) {
+			// TODO Bloque catch generado automáticamente
+			e.printStackTrace();
 		}
 		
 	}
